@@ -1,1 +1,1 @@
-rootProject.name = "NetworkUtils"
+rootProject.name = "NetworkUtils".toLowerCase()

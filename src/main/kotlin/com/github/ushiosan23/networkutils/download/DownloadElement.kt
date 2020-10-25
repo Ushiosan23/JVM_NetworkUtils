@@ -159,7 +159,7 @@ class DownloadElement : IDownloadElement {
 		// Start download section
 		try {
 			// Create local vars
-			var iterationRead = 0
+			var iterationRead: Int
 			val outputStream = tmpOutputFile!!.outputStream()
 			val httpStream = BufferedInputStream(downloadURL.openStream())
 			val buffer = ByteArray(1024)
