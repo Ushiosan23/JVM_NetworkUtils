@@ -45,12 +45,21 @@ public class HttpRequestAction extends CoroutineElement {
 	 * --------------------------------------------------------- */
 
 	/**
-	 * Create action request with uri and headers
+	 * Create action request with uri.
 	 *
 	 * @param uri Target uri to make request
 	 */
 	public HttpRequestAction(URI uri) {
 		requestURI = uri;
+	}
+
+	/**
+	 * Create action request with uri.
+	 *
+	 * @param uri Target uri to make request
+	 */
+	public HttpRequestAction(String uri) {
+		this(URI.create(uri));
 	}
 
 	/* ---------------------------------------------------------
