@@ -30,6 +30,16 @@ java {
 	withSourcesJar()
 }
 
+tasks {
+	compileKotlin.configure {
+		kotlinOptions.jvmTarget = "11"
+	}
+
+	compileTestKotlin.configure {
+		kotlinOptions.jvmTarget = "11"
+	}
+}
+
 // Library Dependencies
 dependencies {
 	/* kotlin */
