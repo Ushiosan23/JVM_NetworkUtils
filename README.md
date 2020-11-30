@@ -45,7 +45,7 @@ put in your gradle project the next code:
     }
 
     dependencies {
-        implementation "com.github.ushiosan23:networkutils:0.0.1"
+        implementation "com.github.ushiosan23:networkutils:0.0.2"
     }
 ```
 
@@ -56,7 +56,7 @@ put in your gradle project the next code:
     }
 
     dependencies {
-        implementation("com.github.ushiosan23:networkutils:0.0.1")
+        implementation("com.github.ushiosan23:networkutils:0.0.2")
     }
 ```
 
@@ -66,7 +66,81 @@ put in your gradle project the next code:
         <dependency>
             <groupId>com.github.ushiosan23</groupId>
             <artifactId>networkutils</artifactId>
-            <version>0.0.1</version>
+            <version>0.0.2</version>
         </dependency>
     </dependencies>
+```
+
+
+## How to use
+
+
+### Simple http request
+
+- Java
+```java
+import com.github.ushiosan23.networkutils.http.HttpRequestAction;
+
+class SimpleHttpRequest {
+
+    HttpRequestAction action = new HttpRequestAction("https://api.github.com/users/Ushiosan23");
+
+    // Create asynchronous request
+    public void makeSyncRequest() throws Exception {
+        System.out.println(action.get().body());
+    }
+
+    // Create asynchronous request
+    public void makeAsyncRequest() {
+        // Action always return the same action
+        action.getAsync(action -> {
+            System.out.println(action.body());
+            return action;
+        });
+    }
+
+    public static void main(String[] args) throws Exception {
+        SimpleHttpRequest request = new SimpleHttpRequest();
+        request.makeAsyncRequest();
+        request.makeSyncRequest();
+
+        Thread.sleep(5000);
+    }
+}
+```
+
+- Kotlin
+```kotlin
+import com.github.ushiosan23.networkutils.http.HttpRequestAction
+
+
+fun main() {
+    val request = HttpRequestAction("https://api.github.com/users/Ushiosan23")
+    
+    // Asynchronous request
+    request.getAsync { action ->
+    	println(action.body())
+        return@getAsync action
+    }
+
+    // Synchronous request
+    println(request.get().body())
+    Thread.sleep(5000)
+}
+```
+
+- Kotlin Coroutines
+```kotlin
+import com.github.ushiosan23.networkutils.http.HttpRequestAction
+import com.github.ushiosan23.networkutils.http.getAsyncC
+
+suspend fun main() {
+    val request = HttpRequestAction("https://api.github.com/users/Ushiosan23")
+    
+    // Asynchronous request with coroutines
+    println(request.getAsyncC().body())
+
+    // Synchronous request
+    println(request.get().body())
+}
 ```
