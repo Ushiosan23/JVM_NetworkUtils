@@ -4,15 +4,20 @@
 Utilities used to manage network actions in JVM (Java Virtual Machine).
 
 
+## Feature status
+- :ballot_box_with_check: Complete
+- :white_square_button: Partial complete
+- :black_square_button: Incomplete
+
 ## Features
 
 - Make Http request
-    - [x] GET
-        - [x] Sync
-        - [x] Async
-    - [ ] POST
-        - [ ] Sync
-        - [ ] Async
+    - :ballot_box_with_check: GET
+        - :ballot_box_with_check: Sync
+        - :ballot_box_with_check: Async
+    - :ballot_box_with_check: POST
+        - :ballot_box_with_check: Sync
+        - :ballot_box_with_check: Async
     - [ ] PUT
         - [ ] Sync
         - [ ] Async
@@ -26,11 +31,18 @@ Utilities used to manage network actions in JVM (Java Virtual Machine).
     - [ ] Get percentage of download
     - [ ] Calculate file size
     - [ ] Real time download status
-- Upload files to server
+- :white_square_button: Upload files to server
     - [ ] Get percentage of upload
     - [ ] Calculate time
     - [ ] Real time download status
 
+
+## Problems
+
+It's not possible to upload large files. I'm working to fix this problem.
+If you know how to upload large files by chunks you can fork this repo and make a pull request. 
+
+#### Any help is good. 👌😁
 
 ## Download
 
