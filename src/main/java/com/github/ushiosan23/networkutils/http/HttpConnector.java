@@ -2,7 +2,6 @@ package com.github.ushiosan23.networkutils.http;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.net.CookieHandler;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -79,7 +78,7 @@ final class HttpConnector {
 	 * @return {@link HttpRequest.BodyPublisher} Instance result
 	 */
 	@NotNull
-	static HttpRequest.BodyPublisher makeBodyPublisher(@NotNull Map<?, ?> data) {
+	static HttpRequest.BodyPublisher makeBodyPublisher(@NotNull Map<String, ?> data) {
 		// Make string builder
 		StringBuilder builder = new StringBuilder();
 
@@ -92,7 +91,7 @@ final class HttpConnector {
 			// Insert data to string builder
 			builder.append(URLEncoder.encode((String) entry.getKey(), StandardCharsets.UTF_8));
 			builder.append("=");
-			builder.append(entry.getValue());
+			builder.append(URLEncoder.encode(entry.getValue().toString(), StandardCharsets.UTF_8));
 		}
 
 		// Create body publisher
@@ -112,8 +111,7 @@ final class HttpConnector {
 	 */
 	private static HttpClient createHttpClient() {
 		return HttpClient.newBuilder()
-			.version(HttpClient.Version.HTTP_2)
-			.cookieHandler(CookieHandler.getDefault())
+			.version(HttpClient.Version.HTTP_1_1)
 			.build();
 	}
 

@@ -6,14 +6,17 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -215,6 +218,7 @@ public class HttpRequestAction extends CoroutineElement {
 		HttpRequest request = getBuilder()
 			.uri(requestURI)
 			.POST(HttpConnector.makeBodyPublisher(data))
+			.header("Content-Type", "application/x-www-form-urlencoded")
 			.headers(makeHeaders())
 			.build();
 
@@ -222,19 +226,35 @@ public class HttpRequestAction extends CoroutineElement {
 	}
 
 	/**
-	 * Send byte array request.
+	 * Send POST http request with data (files and documents).
 	 *
 	 * @param data Data to send.
-	 * @return {@link HttpResponse} Request result.
+	 * @return {@link HttpResponse} request response result.
 	 * @throws IOException          if an I/O error occurs when sending or receiving
 	 * @throws InterruptedException if the operation is interrupted
 	 */
-	public HttpResponse<String> postByteArray(@Nullable Map<String, byte[]> data) throws IOException, InterruptedException {
+	public HttpResponse<String> postD(@Nullable Map<String, Object> data) throws IOException, InterruptedException {
 		if (data == null) data = Collections.emptyMap();
 		HttpClient client = HttpConnector.getHttpClient();
+		HttpRequestMultipartFormData.Builder formDataBuilder = HttpRequestMultipartFormData.newBuilder();
+
+		for (Map.Entry<String, Object> entry : data.entrySet()) {
+			if (entry.getValue() instanceof File) {
+				formDataBuilder.addFile((File) entry.getValue());
+			} else if (entry.getValue() instanceof Path) {
+				formDataBuilder.addFile(((Path) entry.getValue()).toFile());
+			} else {
+				formDataBuilder.addText(entry.getKey(), (String) entry.getValue());
+			}
+		}
+
+		// Build multipart
+		HttpRequestMultipartFormData multipartFormData = formDataBuilder.build();
+
 		HttpRequest request = getBuilder()
 			.uri(requestURI)
-			.POST(HttpConnector.makeBodyPublisher(data))
+			.POST(multipartFormData.getBodyPublisher())
+			.header("Content-Type", multipartFormData.getContentType())
 			.headers(makeHeaders())
 			.build();
 
@@ -253,6 +273,7 @@ public class HttpRequestAction extends CoroutineElement {
 		HttpRequest request = getBuilder()
 			.uri(requestURI)
 			.POST(HttpConnector.makeBodyPublisher(data))
+			.header("Content-Type", "application/x-www-form-urlencoded")
 			.headers(makeHeaders())
 			.build();
 
@@ -263,17 +284,33 @@ public class HttpRequestAction extends CoroutineElement {
 	}
 
 	/**
-	 * Send byte array request.
+	 * Send POST http request with data (files and documents).
 	 *
 	 * @param action Async action request.
 	 * @param data   Data to send
 	 */
-	public void postByteArrayAsync(@NotNull HttpAction<HttpResponse<String>> action, @Nullable Map<String, byte[]> data) {
+	public void postAsyncD(@NotNull HttpAction<HttpResponse<String>> action, @Nullable Map<String, Object> data) throws IOException {
 		if (data == null) data = Collections.emptyMap();
 		HttpClient client = HttpConnector.getHttpClient();
+		HttpRequestMultipartFormData.Builder formDataBuilder = HttpRequestMultipartFormData.newBuilder();
+
+		for (Map.Entry<String, Object> entry : data.entrySet()) {
+			if (entry.getValue() instanceof File) {
+				formDataBuilder.addFile((File) entry.getValue());
+			} else if (entry.getValue() instanceof Path) {
+				formDataBuilder.addFile(((Path) entry.getValue()).toFile());
+			} else {
+				formDataBuilder.addText(entry.getKey(), (String) entry.getValue());
+			}
+		}
+
+		// Build multipart
+		HttpRequestMultipartFormData multipartFormData = formDataBuilder.build();
+
 		HttpRequest request = getBuilder()
 			.uri(requestURI)
-			.POST(HttpConnector.makeBodyPublisher(data))
+			.POST(multipartFormData.getBodyPublisher())
+			.header("Content-Type", multipartFormData.getContentType())
 			.headers(makeHeaders())
 			.build();
 
@@ -298,12 +335,20 @@ public class HttpRequestAction extends CoroutineElement {
 	private String[] makeHeaders() {
 		// Create array list
 		ArrayList<String> headersFormat = new ArrayList<>();
-		// Check if headers is null and return empty array
-		if (requestHeaders == null) return headersFormat.toArray(String[]::new);
 
+		// Check if headers is null and return empty array
+		if (requestHeaders == null) {
+			requestHeaders = new HashMap<>();
+		}
+
+		requestHeaders.put(
+			"User-Agent",
+			String.format("Java-http-client/%s", System.getProperty("java.version"))
+		);
 		// Iterate all map entries
 		for (Map.Entry<String, String> entry : requestHeaders.entrySet()) {
-			headersFormat.add(String.format("%s: %s", entry.getKey(), entry.getValue()));
+			headersFormat.add(entry.getKey());
+			headersFormat.add(entry.getValue());
 		}
 
 		// Return array with headers
