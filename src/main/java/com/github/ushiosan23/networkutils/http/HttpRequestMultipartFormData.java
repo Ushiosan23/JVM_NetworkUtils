@@ -161,6 +161,7 @@ public final class HttpRequestMultipartFormData {
 		 *
 		 * @param file Target file to send.
 		 * @return Current builder instance.
+		 * @throws IOException if an I/O error occurs when sending or receiving
 		 */
 		public Builder addFile(@NotNull File file) throws IOException {
 			if (!file.exists()) throw new IOException(String.format("File \"%s\" not exists.", file));
@@ -173,6 +174,7 @@ public final class HttpRequestMultipartFormData {
 		 *
 		 * @param location Target file to send.
 		 * @return Current builder instance.
+		 * @throws IOException if an I/O error occurs when sending or receiving
 		 */
 		public Builder addFile(String location) throws IOException {
 			return addFile(new File(location));

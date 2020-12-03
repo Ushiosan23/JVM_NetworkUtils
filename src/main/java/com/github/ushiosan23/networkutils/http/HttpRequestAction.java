@@ -302,6 +302,7 @@ public class HttpRequestAction extends CoroutineElement {
 	 *
 	 * @param action Async action request.
 	 * @param data   Data to send
+	 * @throws IOException if an I/O error occurs when sending or receiving
 	 */
 	public void postAsyncD(@NotNull HttpAction<HttpResponse<String>> action, @Nullable Map<String, Object> data) throws IOException {
 		if (data == null) data = Collections.emptyMap();
