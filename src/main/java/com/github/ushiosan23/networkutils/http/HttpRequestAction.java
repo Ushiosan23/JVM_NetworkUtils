@@ -10,9 +10,11 @@ import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -34,7 +36,7 @@ public class HttpRequestAction extends CoroutineElement {
 	/**
 	 * Request url
 	 */
-	private final URI requestURI;
+	private URI requestURI;
 
 	/**
 	 * Request headers
@@ -164,6 +166,18 @@ public class HttpRequestAction extends CoroutineElement {
 	 */
 	public HttpRequestAction setRequestHeaders(Map<String, String> headers) {
 		requestHeaders = headers;
+		return this;
+	}
+
+	/**
+	 * Set url query data
+	 *
+	 * @param data Map data
+	 * @return Current action instance
+	 */
+	@SuppressWarnings("UnusedReturnValue")
+	public HttpRequestAction setQuery(Map<String, String> data) {
+		requestURI = makeUrlQuery(data);
 		return this;
 	}
 
@@ -320,6 +334,80 @@ public class HttpRequestAction extends CoroutineElement {
 			.thenAccept(action::thenAccept);
 	}
 
+	/**
+	 * Send PUT http simple request.
+	 *
+	 * @return {@link HttpResponse} request result.
+	 * @throws IOException          if an I/O error occurs when sending or receiving
+	 * @throws InterruptedException if the operation is interrupted
+	 */
+	public HttpResponse<String> put() throws InterruptedException, IOException {
+		HttpClient client = HttpConnector.getHttpClient();
+		HttpRequest request = getBuilder()
+			.uri(requestURI)
+			.PUT(HttpRequest.BodyPublishers.noBody())
+			.headers(makeHeaders())
+			.build();
+
+		return client.send(request, HttpResponse.BodyHandlers.ofString());
+	}
+
+	/**
+	 * Send PUT http simple request asynchronously.
+	 *
+	 * @param action Async action request.
+	 */
+	public void putAsync(@NotNull HttpAction<HttpResponse<String>> action) {
+		HttpClient client = HttpConnector.getHttpClient();
+		HttpRequest request = getBuilder()
+			.uri(requestURI)
+			.PUT(HttpRequest.BodyPublishers.noBody())
+			.headers(makeHeaders())
+			.build();
+
+		client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+			.thenApply(action::invoke)
+			.exceptionally(e -> action.exceptionally(e, request))
+			.thenAccept(action::thenAccept);
+	}
+
+	/**
+	 * Send DELETE http simple request synchronous.
+	 *
+	 * @return {@link HttpResponse} request result.
+	 * @throws IOException          if an I/O error occurs when sending or receiving
+	 * @throws InterruptedException if the operation is interrupted
+	 */
+	public HttpResponse<String> delete() throws IOException, InterruptedException {
+		HttpClient client = HttpConnector.getHttpClient();
+		HttpRequest request = getBuilder()
+			.uri(requestURI)
+			.DELETE()
+			.headers(makeHeaders())
+			.build();
+
+		return client.send(request, HttpResponse.BodyHandlers.ofString());
+	}
+
+	/**
+	 * Send DELETE http simple request asynchronously.
+	 *
+	 * @param action Async action request.
+	 */
+	public void deleteAsync(@NotNull HttpAction<HttpResponse<String>> action) {
+		HttpClient client = HttpConnector.getHttpClient();
+		HttpRequest request = getBuilder()
+			.uri(requestURI)
+			.DELETE()
+			.headers(makeHeaders())
+			.build();
+
+		client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+			.thenApply(action::invoke)
+			.exceptionally(e -> action.exceptionally(e, request))
+			.thenAccept(action::thenAccept);
+	}
+
 	/* ---------------------------------------------------------
 	 *
 	 * Private Methods
@@ -353,6 +441,40 @@ public class HttpRequestAction extends CoroutineElement {
 
 		// Return array with headers
 		return headersFormat.toArray(String[]::new);
+	}
+
+	/**
+	 * Create query url data.
+	 *
+	 * @param data Map data
+	 */
+	@NotNull
+	private URI makeUrlQuery(@NotNull Map<String, String> data) {
+		// check if request is empty
+		if (data.isEmpty()) return requestURI;
+		// Create builder
+		StringBuilder builder = new StringBuilder(requestURI.toString());
+
+		if (requestURI.getQuery() == null) {
+			builder.append("?");
+		} else {
+			builder.append("&");
+		}
+
+		// Iterate all data
+		for (Map.Entry<String, String> entry : data.entrySet()) {
+			builder.append(URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8));
+			builder.append("=");
+			builder.append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8));
+			builder.append("&");
+		}
+
+		// Delete last ampersand
+		int lastFound = builder.lastIndexOf("&");
+		if (lastFound != -1) builder.deleteCharAt(lastFound);
+
+		System.out.println(builder.toString());
+		return URI.create(builder.toString());
 	}
 
 	/**
