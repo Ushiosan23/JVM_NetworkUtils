@@ -15,18 +15,23 @@ Utilities used to manage network actions in JVM (Java Virtual Machine).
     - :ballot_box_with_check: GET
         - :ballot_box_with_check: Sync
         - :ballot_box_with_check: Async
+        - :ballot_box_with_check: Coroutines
     - :ballot_box_with_check: POST
         - :ballot_box_with_check: Sync
         - :ballot_box_with_check: Async
+        - [ ] Coroutines
     - :ballot_box_with_check: PUT
         - :ballot_box_with_check: Sync
         - :ballot_box_with_check: Async
+        - [ ] Coroutines
     - [ ] PATCH
         - [ ] Sync
         - [ ] Async
+        - [ ] Coroutines
     - :ballot_box_with_check: DELETE
         - :ballot_box_with_check: Sync
         - :ballot_box_with_check: Async
+        - [ ] Coroutines
 - Download resources from server
     - [ ] Get percentage of download
     - [ ] Calculate file size
