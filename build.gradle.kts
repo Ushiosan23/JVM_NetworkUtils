@@ -16,7 +16,7 @@ plugins {
 
 // Base configuration
 group = "com.github.ushiosan23"
-version = "0.0.1"
+version = "0.0.2"
 
 // Repositories
 repositories {
@@ -28,6 +28,16 @@ repositories {
 java {
 	withJavadocJar()
 	withSourcesJar()
+}
+
+tasks {
+	compileKotlin.configure {
+		kotlinOptions.jvmTarget = "11"
+	}
+
+	compileTestKotlin.configure {
+		kotlinOptions.jvmTarget = "11"
+	}
 }
 
 // Library Dependencies
