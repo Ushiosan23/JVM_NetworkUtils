@@ -12,6 +12,7 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
+import java.net.http.HttpHeaders;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiPredicate;
 
 /**
  * Request action class.
@@ -409,6 +411,30 @@ public class HttpRequestAction extends CoroutineElement {
 			.thenAccept(action::thenAccept);
 	}
 
+	/**
+	 * Send simple request without body (it's a fast request) and only return document headers
+	 *
+	 * @return {@link HttpHeaders} document headers or {@code null} if headers not exists
+	 */
+	public HttpHeaders getHeaders() {
+		// Catch error exception
+		try {
+			// Get http client
+			HttpClient client = HttpConnector.getHttpClient();
+			HttpRequest.Builder builder = getBuilder()
+				.uri(requestURI)
+				.method("HEAD", HttpRequest.BodyPublishers.noBody());
+			// Build request
+			HttpRequest request = builder.build();
+			// Start request
+			HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
+			// Return request status
+			return response.headers();
+		} catch (Exception e) {
+			return HttpHeaders.of(Collections.emptyMap(), (s, s2) -> true);
+		}
+	}
+
 	/* ---------------------------------------------------------
 	 *
 	 * Private Methods
@@ -487,6 +513,54 @@ public class HttpRequestAction extends CoroutineElement {
 	@Contract(value = " -> new", pure = true)
 	private HttpRequest.Builder getBuilder() {
 		return HttpRequest.newBuilder();
+	}
+
+	/* ---------------------------------------------------------
+	 *
+	 * Static methods
+	 *
+	 * --------------------------------------------------------- */
+
+	/**
+	 * Check if url exists
+	 *
+	 * @param uri Target url to check
+	 * @return Request status
+	 */
+	public static boolean exists(URI uri) {
+		HttpRequestAction action = new HttpRequestAction(uri);
+		return action.exists();
+	}
+
+	/**
+	 * Check if url exists
+	 *
+	 * @param url Target url to check
+	 * @return Request status
+	 */
+	public static boolean exists(String url) {
+		return exists(URI.create(url));
+	}
+
+	/**
+	 * Get url headers
+	 *
+	 * @param uri Target url to check
+	 * @return Request headers
+	 */
+	public static HttpHeaders getHeaders(URI uri) {
+		HttpRequestAction action = new HttpRequestAction(uri);
+		return action.getHeaders();
+	}
+
+	/**
+	 * Get url headers
+	 *
+	 * @param url Target url to check
+	 * @return Request headers
+	 */
+	public static HttpHeaders getHeaders(String url) {
+		return getHeaders(URI.create(url));
 	}
 
 }
