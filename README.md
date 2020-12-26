@@ -32,10 +32,10 @@ Utilities used to manage network actions in JVM (Java Virtual Machine).
 		- :ballot_box_with_check: Async
 		- :ballot_box_with_check: Coroutines
 - Download resources from server
-	- [x] Get percentage of download
-	- [x] Calculate file size
-	- [x] Real time download status
-	- [x] Cancel download
+	- :ballot_box_with_check: Get percentage of download
+	- :ballot_box_with_check: Calculate file size
+	- :ballot_box_with_check: Real time download status
+	- :ballot_box_with_check: Cancel download
 	- :white_square_button: Pause download (Partial)
 		- [ ] Resume download
 - :white_square_button: Upload files to server
