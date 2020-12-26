@@ -62,7 +62,7 @@ You can download jar file from [Release](#Release) section or put in your gradle
 }
 
 dependencies {
-	implementation "com.github.ushiosan23:networkutils:0.0.2"
+	implementation "com.github.ushiosan23:networkutils:0.0.3"
 }
 ```
 
@@ -74,7 +74,7 @@ dependencies {
 }
 
 dependencies {
-	implementation("com.github.ushiosan23:networkutils:0.0.2")
+	implementation("com.github.ushiosan23:networkutils:0.0.3")
 }
 ```
 
@@ -85,7 +85,7 @@ dependencies {
         <dependency>
             <groupId>com.github.ushiosan23</groupId>
             <artifactId>networkutils</artifactId>
-            <version>0.0.2</version>
+            <version>0.0.3</version>
         </dependency>
     </dependencies>
 ```
