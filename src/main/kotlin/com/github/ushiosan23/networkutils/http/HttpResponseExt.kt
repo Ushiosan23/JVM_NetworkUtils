@@ -8,6 +8,16 @@ import kotlinx.serialization.json.decodeFromJsonElement
 import java.net.http.HttpResponse
 
 /**
+ * Custom json encoder
+ */
+val jsonEncoder = Json {
+	encodeDefaults = true
+	prettyPrint = true
+	ignoreUnknownKeys = true
+	allowStructuredMapKeys = true
+}
+
+/**
  * Check if request is valid json response
  */
 val HttpResponse<*>.isValidJson: Boolean
@@ -15,7 +25,7 @@ val HttpResponse<*>.isValidJson: Boolean
 		when (val body = body()) {
 			is JsonElement, JsonObject -> true
 			is String -> {
-				Json.decodeFromString<JsonElement>(body)
+				jsonEncoder.decodeFromString<JsonElement>(body)
 				true
 			}
 			else -> false
@@ -29,16 +39,16 @@ val HttpResponse<*>.isValidJson: Boolean
  *
  * @return [JsonElement] if is valid json or `null` if not
  */
-fun HttpResponse<*>.getJson(): JsonElement? {
+fun HttpResponse<*>.getJson(): JsonObject? {
 	// Check if is valid json
 	if (!isValidJson) return null
 
 	// Decode element
 	return try {
 		when (val body = body()) {
-			is JsonElement -> body
+			is JsonElement -> body as JsonObject?
 			is JsonObject -> body
-			is String -> Json.decodeFromString(body)
+			is String -> jsonEncoder.decodeFromString(body)
 			else -> null
 		}
 	} catch (ignored: Exception) {
@@ -51,16 +61,16 @@ fun HttpResponse<*>.getJson(): JsonElement? {
  *
  * @return [T] object or `null` if is not valid json object
  */
-inline fun <reified T> HttpResponse<*>.getJson(clazz: Class<T>): T? {
+inline fun <reified T> HttpResponse<*>.getJson(): T? {
 	// Check if is valid json
 	if (!isValidJson) return null
 
 	// Decode element
 	return try {
 		when (val body = body()) {
-			is JsonElement -> Json.decodeFromJsonElement<T>(body)
-			is JsonObject -> Json.decodeFromJsonElement<T>(body)
-			is String -> Json.decodeFromString<T>(body)
+			is JsonElement -> jsonEncoder.decodeFromJsonElement<T>(body)
+			is JsonObject -> jsonEncoder.decodeFromJsonElement<T>(body)
+			is String -> jsonEncoder.decodeFromString<T>(body)
 			else -> null
 		}
 	} catch (ignored: Exception) {

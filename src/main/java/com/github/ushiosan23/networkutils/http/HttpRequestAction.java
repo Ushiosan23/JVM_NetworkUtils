@@ -80,7 +80,9 @@ public class HttpRequestAction extends CoroutineElement {
 	 *
 	 * @param attachHeaders Set request defined headers
 	 * @return {@link Boolean} status {@code false} if url page not exists
+	 * @deprecated Fails in many cases, use {@link #head(boolean)} instead
 	 */
+	@Deprecated(since = "0.0.4")
 	public boolean exists(boolean attachHeaders) {
 		// Catch error exception
 		try {
@@ -107,7 +109,9 @@ public class HttpRequestAction extends CoroutineElement {
 	 * This method by default set attachHeaders to false.
 	 *
 	 * @return {@link Boolean} status {@code false} if url page not exists
+	 * @deprecated Fails in many cases, use {@link #head(boolean)} instead
 	 */
+	@Deprecated(since = "0.0.4")
 	public boolean exists() {
 		return exists(false);
 	}
@@ -118,7 +122,9 @@ public class HttpRequestAction extends CoroutineElement {
 	 * @param attachHeaders Attach headers to request
 	 * @param runnable      Action to execute. Only if not has an error.
 	 * @return {@link Throwable} error or {@code null} if don't have error
+	 * @deprecated Fails in many cases, use {@link #head(boolean)} instead
 	 */
+	@Deprecated(since = "0.0.4")
 	@Nullable
 	public Throwable existsCatching(boolean attachHeaders, @Nullable Runnable runnable) {
 		// Catch error exception
@@ -154,7 +160,9 @@ public class HttpRequestAction extends CoroutineElement {
 	 *
 	 * @param runnable Action to execute. Only if not has an error.
 	 * @return {@link Throwable} error or {@code null} if don't have error
+	 * @deprecated Fails in many cases, use {@link #head(boolean)} instead
 	 */
+	@Deprecated(since = "0.0.4")
 	@Nullable
 	public Throwable existsCatching(@Nullable Runnable runnable) {
 		return existsCatching(false, runnable);
@@ -181,6 +189,28 @@ public class HttpRequestAction extends CoroutineElement {
 	public HttpRequestAction setQuery(Map<String, String> data) {
 		requestURI = makeUrlQuery(data);
 		return this;
+	}
+
+	/**
+	 * Get HEAD http request. Use this method instead exists
+	 *
+	 * @param attachHeaders Attach custom headers
+	 * @return {@link HttpResponse} without data
+	 * @throws IOException          if an I/O error occurs when sending or receiving
+	 * @throws InterruptedException if the operation is interrupted
+	 */
+	public HttpResponse<Void> head(boolean attachHeaders) throws IOException, InterruptedException {
+		// Get http client
+		HttpClient client = HttpConnector.getHttpClient();
+		HttpRequest.Builder builder = getBuilder()
+			.uri(requestURI)
+			.method("HEAD", HttpRequest.BodyPublishers.noBody());
+		// Attach headers only if param is defined
+		if (attachHeaders) builder.headers(makeHeaders());
+		// Build request
+		HttpRequest request = builder.build();
+		// Start request
+		return client.send(request, HttpResponse.BodyHandlers.discarding());
 	}
 
 	/**
@@ -417,20 +447,13 @@ public class HttpRequestAction extends CoroutineElement {
 	 * @return {@link HttpHeaders} document headers or {@code null} if headers not exists
 	 */
 	public HttpHeaders getHeaders() {
-		// Catch error exception
 		try {
-			// Get http client
-			HttpClient client = HttpConnector.getHttpClient();
-			HttpRequest.Builder builder = getBuilder()
-				.uri(requestURI)
-				.method("HEAD", HttpRequest.BodyPublishers.noBody());
-			// Build request
-			HttpRequest request = builder.build();
-			// Start request
-			HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
-			// Return request status
+			// Send request
+			HttpResponse<Void> response = head(false);
+			// Get headers
 			return response.headers();
-		} catch (Exception e) {
+		} catch (Exception err) {
+			// Create empty headers
 			return HttpHeaders.of(Collections.emptyMap(), (s, s2) -> true);
 		}
 	}
@@ -526,7 +549,9 @@ public class HttpRequestAction extends CoroutineElement {
 	 *
 	 * @param uri Target url to check
 	 * @return Request status
+	 * @deprecated Fails in many cases, use {@link #head(boolean)} instead
 	 */
+	@Deprecated(since = "0.0.4")
 	public static boolean exists(URI uri) {
 		HttpRequestAction action = new HttpRequestAction(uri);
 		return action.exists();
@@ -537,7 +562,9 @@ public class HttpRequestAction extends CoroutineElement {
 	 *
 	 * @param url Target url to check
 	 * @return Request status
+	 * @deprecated Fails in many cases, use {@link #head(boolean)} instead
 	 */
+	@Deprecated(since = "0.0.4")
 	public static boolean exists(String url) {
 		return exists(URI.create(url));
 	}

@@ -90,6 +90,7 @@ public final class DownloadElement extends BaseDownload {
 	 *
 	 * @return Request result
 	 */
+	@Deprecated(since = "0.0.4")
 	public boolean downloadExists() {
 		return HttpRequestAction.exists(downloadURL);
 	}
